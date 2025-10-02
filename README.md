@@ -6,19 +6,19 @@ Stores tasks in a JSON file, with the user able to:
     - Mark a task as in progress or done
     - List all tasks (including filtering by done/not done/in progress)
 
-TASK PROPERTIES:
-    id: A unique identifier for the task
-    description: A short description of the task
-    status: The status of the task (todo, in-progress, done)
-    createdAt: The date and time when the task was created
-    updatedAt: The date and time when the task was last updated
+TASK PROPERTIES: <br>
+    &emsp; id: A unique identifier for the task<br>
+    &emsp; description: A short description of the task<br>
+    &emsp; status: The status of the task (todo, in-progress, done)<br>
+    &emsp; createdAt: The date and time when the task was created<br>
+    &emsp; updatedAt: The date and time when the task was last updated<br>
 
-COMMAND USAGE:
-    task-cli.py add "Description"
-    task-cli.py update ID "New description"
-    task-cli.py mark-in-progress ID
-    task-cli.py mark-done ID
-    task-cli.py list
-    task-cli.py list done
-    task-cli.py list todo
-    task-cli.py list in-progress
+COMMAND USAGE: <br>
+    &emsp; task-cli.py add "Description"<br>
+    &emsp; task-cli.py update ID "New description"<br>
+    &emsp; task-cli.py mark-in-progress ID<br>
+    &emsp; task-cli.py mark-done ID<br>
+    &emsp; task-cli.py list<br>
+    &emsp; task-cli.py list done<br>
+    &emsp; task-cli.py list todo<br>
+    &emsp; task-cli.py list in-progress<br>
