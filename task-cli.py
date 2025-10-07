@@ -92,17 +92,34 @@ elif command == 'delete':
     else:
         del tasks[sys.argv[2]]
 # NOTE: Maybe mark-in-progress, mark-done can be lumped together. Same structure and basic functionality.
-elif command == 'mark-in-progress':
-    pass
-    # TODO: Throw an error if task does not exist
-    # TODO: Throw an error if no file exists
-elif command == 'mark-done':
-    pass
-    # TODO: Throw an error if task does not exist
+elif command == 'mark-in-progress' or command == 'mark-done':
+    if num_args != 3:
+        print('Error: Invalid number of arguments. (Format: task-cli mark-in-progress ID, or ' \
+        '      task-cli mark-done ID.)')
+    elif not sys.argv[2].isdigit() or (int(sys.argv[2]) <= 0 or int(sys.argv[2]) >= current_id):
+        print('Error: Invalid ID number.')
+    else:
+        # Will set status to 'in-progress' or 'done'
+        tasks[sys.argv[2]]['status'] = sys.argv[1][5:]
 elif command == 'list':
     pass
     # TODO: Add error handling for when no JSON file exists.
     # TODO: Add handling of arguments for task status (done, todo, in-progress)
+
+    # Determine which tasks to print depending on task.
+    if num_args == 2:
+        task_list = tasks
+    else:
+        if num_args > 3:
+            print('Error: Too many arguments specified. (Format: task-cli list {todo, in-progress, done})')
+        elif sys.argv[2] not in ('todo', 'in-progress', 'done'):
+            print('Error: Invalid status given. (Specify one of todo, in-progress, or done.)')
+        else:
+            task_list = tasks
+
+    # Print all selected arguments. 
+    for j in task_list.items():
+        print(j)
 else:
     print('Error: invalid command specified.')
     # quit()
