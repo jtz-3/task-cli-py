@@ -16,9 +16,10 @@ TASK PROPERTIES: <br>
 COMMAND USAGE: <br>
     &emsp; task-cli.py add "Description"<br>
     &emsp; task-cli.py update ID "New description"<br>
+    &emsp; task-cli.py mark-todo ID<br>
     &emsp; task-cli.py mark-in-progress ID<br>
     &emsp; task-cli.py mark-done ID<br>
-    &emsp; task-cli.py list<br>
+    &emsp; task-cli.py list all<br>
     &emsp; task-cli.py list done<br>
     &emsp; task-cli.py list todo<br>
     &emsp; task-cli.py list in-progress<br>
