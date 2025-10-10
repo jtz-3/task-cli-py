@@ -2,11 +2,6 @@
 
 # A task manager CLI tool.
 
-"""
-    1. Consider adding 'mark-todo'.
-    2. Consider only updating file if modifications have been made.
-"""
-
 import sys
 import json
 import datetime
@@ -20,7 +15,6 @@ except IndexError:
     quit()
 
 # Load and deserialize the task file, or create it if it doesn't exist.
-# Is this proper use of try/except? Maybe if/else is more appropriate.
 try:
     task_file = open('./tasks.json', 'r+')
     tasks = json.load(task_file)
@@ -72,21 +66,18 @@ elif command == 'delete':
         print('Successfully deleted task %s.' % sys.argv[2])
 
 # ADD MARK-TODO. Then handle the command selection more elegantly (begins with mark-...)
-elif command == 'mark-in-progress' or command == 'mark-done':
+elif command in ('mark-in-progress', 'mark-done', 'mark-todo'):
     if num_args != 3:
         print('Error: Invalid number of arguments. (Format: task-cli mark-in-progress ID, or ' \
         '      task-cli mark-done ID.)')
     elif not sys.argv[2].isdigit() or (int(sys.argv[2]) <= 0 or int(sys.argv[2]) >= current_id):
-        print('Error: Invalid ID number.')
+        print('Error: Invalid ID number provided.')
     else:
-        # Will set status to 'in-progress' or 'done'
+        # Will set status to 'in-progress', 'done', or 'todo'.
         tasks[sys.argv[2]]['status'] = sys.argv[1][5:]
+        tasks[sys.argv[2]]['updatedAt'] = str(datetime.datetime.today())
         print('Task %s successfully marked as %s.' % (sys.argv[2], sys.argv[1][5:]))
 elif command == 'list':
-    # TODO: Add error handling for when no JSON file exists.
-    # TODO: Add handling of arguments for task status (done, todo, in-progress)
-
-
     if num_args != 3:
         print('Error: Invalid number of arguments. (Format: task-cli list {all, done, todo, in-progress})')
     else:
