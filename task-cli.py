@@ -1,10 +1,10 @@
+#!/usr/bin/python3
+
 # A task manager CLI tool.
 
-# NOTE NEXT STEPS HERE.
-# NEXT STEPS 10/2/25
 """
-    1. Work on mark-in-progress, mark-done commands
-    2. Consider adding separate error messages for updating/deleting if no file exists.
+    1. Consider adding 'mark-todo'.
+    2. Consider only updating file if modifications have been made.
 """
 
 import sys
@@ -12,7 +12,7 @@ import json
 import datetime
 
 # Retrieve the command
-# Valid commands: add, update, delete, mark-in-progress, mark-done, list (done/todo/inprogress)
+# Valid commands: add, update, delete, mark-in-progress, mark-done, list (all/done/todo/inprogress)
 try:
     command = sys.argv[1]
 except IndexError:
@@ -29,23 +29,15 @@ except FileNotFoundError:
     tasks = {}
     file_exists = False
 
-# Debug
-# print("OLD TASK FILE:")
-# for k in tasks.keys():
-#     print(k + ": ")
-#     print(tasks[k])
-# print('\n')
-
-# Consider replacing this with num_tasks and then adding 1 elsewhere (depends on most common usage)
+# Determine the ID of the next task to be added, as well as the number of CLI args passed.
 current_id = len(tasks) + 1
 num_args = len(sys.argv)
 
 if command == 'add':
-
     if num_args == 2:
-        print('Error: No task name specified.')
+        print('Error: No task description given.')
     elif num_args > 3:
-        print('Error: Only one description can be given. (Enter text in quotation marks.)')
+        print('Error: Only one description can be given. (Enclose description in quotation marks.)')
     else:
         task_desc = str(sys.argv[2])
         if not task_desc in tasks:
@@ -58,40 +50,28 @@ if command == 'add':
             print('Error: Cannot re-add an existing task.')
 
 elif command == 'update':
-    # Errors to be handled:
-    # - Invalid number of arguments
-    # - Invalid argument types for description (str) and 
-    #   - Although it will coerce to string anyway.
-    # - Invalid ID provided
-    #   - No tasks to update?
-
     if num_args != 4:
         print('Error: Invalid number of arguments. (Format: task-cli update ID "Description")')
     elif type(sys.argv[3]) != str:
         print('Error: Invalid description passed.')
     elif not sys.argv[2].isdigit() or (int(sys.argv[2]) <= 0 or int(sys.argv[2]) >= current_id):
         print('Error: ID must be a valid integer.')
-        print(sys.argv[2], type(sys.argv[2]), current_id)
     else:
-        # Update - since tasks must exist, can just access the tasks dictionary.
+        # Update the tasks - since tasks must exist (per above), can just access the tasks dictionary directly.
         tasks[sys.argv[2]]["description"] = sys.argv[3]
         tasks[sys.argv[2]]["updatedAt"] = str(datetime.datetime.today())
-        print('Updated successfully')
+        print('Successfully updated task %s.' % sys.argv[2])
         
 elif command == 'delete':
-    # Errors to be handled:
-    # - Improper formatting
-    #   - task-cli.py delete 1 (2 arguments)
-    # - File doesn't exist
-    # - No task with that ID exists
-
     if num_args != 3:
         print('Error: Invalid number of arguments. (Format: task-cli delete ID).')
     elif not sys.argv[2].isdigit() or (int(sys.argv[2]) <= 0 or int(sys.argv[2]) >= current_id):
         print('Error: Invalid ID number.')
     else:
         del tasks[sys.argv[2]]
-# NOTE: Maybe mark-in-progress, mark-done can be lumped together. Same structure and basic functionality.
+        print('Successfully deleted task %s.' % sys.argv[2])
+
+# ADD MARK-TODO. Then handle the command selection more elegantly (begins with mark-...)
 elif command == 'mark-in-progress' or command == 'mark-done':
     if num_args != 3:
         print('Error: Invalid number of arguments. (Format: task-cli mark-in-progress ID, or ' \
@@ -101,56 +81,54 @@ elif command == 'mark-in-progress' or command == 'mark-done':
     else:
         # Will set status to 'in-progress' or 'done'
         tasks[sys.argv[2]]['status'] = sys.argv[1][5:]
+        print('Task %s successfully marked as %s.' % (sys.argv[2], sys.argv[1][5:]))
 elif command == 'list':
-    pass
     # TODO: Add error handling for when no JSON file exists.
     # TODO: Add handling of arguments for task status (done, todo, in-progress)
 
-    # Determine which tasks to print depending on task.
-    if num_args == 2:
-        task_list = tasks
-    else:
-        if num_args > 3:
-            print('Error: Too many arguments specified. (Format: task-cli list {todo, in-progress, done})')
-        elif sys.argv[2] not in ('todo', 'in-progress', 'done'):
-            print('Error: Invalid status given. (Specify one of todo, in-progress, or done.)')
-        else:
-            task_list = tasks
 
-    # Print all selected arguments. 
-    for j in task_list.items():
-        print(j)
+    if num_args != 3:
+        print('Error: Invalid number of arguments. (Format: task-cli list {all, done, todo, in-progress})')
+    else:
+        status = sys.argv[2]
+
+        if status not in ('all', 'done', 'todo', 'in-progress'):
+            print('Error: Invalid task status supplied. (Must be one of: all, done, todo, in-progress)')
+        else:
+            if status == 'all':
+                task_list = tasks
+            else:
+                task_list = {}
+
+                # Filter task list by appropriate status.
+                for t in tasks.items():
+                    if tasks[t[0]]['status'] == status:
+                        task_list.update({t[0]: t[1]})
+
+            if len(task_list) != 0:
+                print('Listing all tasks in category:', status)
+            else:
+                print('No tasks found in category "%s"!' % status)
+
+            for tsk in task_list.items():
+                print('- ID:', tsk[0])
+                print('  - Description:', tsk[1]['description'])
+                if status == 'all':
+                    print('  - Status:', tsk[1]['status'])
+                print('  - Creation date:', tsk[1]['createdAt'])
+                print('  - Last updated:', tsk[1]['updatedAt'])
+                print('\n')
+
 else:
     print('Error: invalid command specified.')
-    # quit()
-    
-# TODO: Make script to run as a command without .py extension (use shebang)
-
-
-
 
 # Deserialize tasks dictionary into JSON and then write it to the file, creating it if it doesn't exist
-if file_exists:
+if not file_exists:
+    task_file = open('tasks.json', 'w')
+    print('New file created')
+else:
     task_file.seek(0)
     task_file.truncate()
-    json.dump(tasks, task_file)
-    task_file.close()
-else:
-    pass
 
-# Debug
-# print("NEW TASK FILE:")
-# for k in tasks.keys():
-#     print(k + ": ")
-#     print(tasks[k])
-# print('\n')
-
-# Current problem: Deserialize the file, read contents, then write by TRUNCATION so as not to 
-# repeatedly append the same thing (if modifying an existing task.)
-
-"""
-Further reading:
-    1. File closing: https://realpython.com/why-close-file-python/
-    2. Context managing: https://realpython.com/python-with-statement/
-    3. 
-"""
+json.dump(tasks, task_file)
+task_file.close()
